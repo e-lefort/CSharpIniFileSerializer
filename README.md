@@ -110,8 +110,8 @@ static void Main(string[] args)
 	gop.Persons.Add(new Person() 
 	{ 
 		FirstName = "Marilyin", 
-		LastName = "Manson", DateOfBirth = 
-		DateTime.Parse("5/01/1969") 
+		LastName = "Manson", 
+		DateOfBirth = DateTime.Parse("5/01/1969") 
 	});
 	
 	IniSerializer.Serialize<GroupOfPerson>(gop,
