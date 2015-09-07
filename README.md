@@ -116,6 +116,7 @@ static void Main(string[] args)
 	
 	IniSerializer.Serialize<GroupOfPerson>(gop,
 		Path.Combine(Directory.GetCurrentDirectory(), "artists.ini"),
+		new IniSettings() { DefaultTypeInfo = TypeInfo.Properties });
 }
 ```
 ```
