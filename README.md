@@ -78,7 +78,7 @@ IniSerializer.Serialize<MyClass>(obj,
 - Generic types (string, char, short, int, long, float, double, bool, Enum, Color, Date)
 - Array and IList
 
-# Advanced serilization (depth)
+# Advanced serialization (depth)
 ```csharp
 public class Person
 {
