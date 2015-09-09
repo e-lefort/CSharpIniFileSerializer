@@ -13,56 +13,6 @@ namespace CSharpIniFileSerializer
 {
     class IniWriter
     {
-        private static bool SetGenericValue(Type type, IConfig config, string fieldName, object obj)
-        {
-            if (obj == null)
-                throw new ArgumentNullException("obj");
-            if (type == null)
-                throw new ArgumentNullException("type");
-            if (config == null)
-                throw new ArgumentNullException("config");
-
-            if (type == typeof(string) || type == typeof(char)
-                || type == typeof(int) || type == typeof(short) || type == typeof(long))
-            {
-                config.Set(fieldName, obj.ToString());
-                return true;
-            }
-            else if (type == typeof(float))
-            {
-                config.Set(fieldName, ((float)obj).ToString("G0", CultureInfo.InvariantCulture));
-                return true;
-            }
-            else if (type == typeof(double))
-            {
-                config.Set(fieldName, ((double)obj).ToString("G0", CultureInfo.InvariantCulture));
-                return true;
-            }
-            else if (type == typeof(bool))
-            {
-                config.Set(fieldName, ((bool)obj ? "true" : "false"));
-                return true;
-            }
-            else if (type == typeof(Color))
-            {
-                config.Set(fieldName, ColorTranslator.ToHtml((Color)obj));
-                return true;
-            }
-            else if (type.IsEnum)
-            {
-                //DescriptionAttribute value = EnumHelper.GetAttributeOfType<DescriptionAttribute>(obj as Enum);
-                //config.Set(fieldName, (value == null) ? obj.ToString() : value.Description);
-                config.Set(fieldName, obj.ToString());
-                return true;
-            }
-            else if (type == typeof(DateTime))
-            {
-                config.Set(fieldName, obj.ToString());
-                return true;
-            }
-            return false;
-        }
-
         public static void Serialize<T>(T obj, ref IConfigSource source, ref IniSettings settings, ref Stack<object> recurciveStackOverFlow, ref Stack<string> depth)
         {
             if (recurciveStackOverFlow.Contains(obj))
@@ -90,19 +40,21 @@ namespace CSharpIniFileSerializer
                 if (value == null)
                     continue;
 
-                if (depth.Count != 0)
+                if (depth.Count != 0 && settings.EnableDepthSectionNaming)
                 {
                     char delimeter = (char)settings.DefaultObjectDelimiter;
                     sectionName = String.Format("{2}{1}{0}", sectionName, delimeter, depth.Reverse().Aggregate((i, j) => i + delimeter + j));
                 }
 
-                IConfig config = source.Configs.Add(sectionName);
+                
                 /* Generic types */
-                if (!SetGenericValue(fieldType, config, fieldName, value))
+                if (fieldType.IsGenericValue())
                 {
-                    source.Configs.Remove(config);
-
-                    /* Array and IList */
+                    source.Configs.Add(sectionName).SetGenericValue(fieldType, fieldName, value);
+                }
+                /* Array and IList */
+                else
+                {
                     if (fieldType.IsArray || fieldType.GetInterface(typeof(IList).Name) != null)
                     {
                         Type type = fieldType.GetElementType() ?? fieldType.GetGenericArguments().First();
@@ -133,11 +85,11 @@ namespace CSharpIniFileSerializer
                                 arrayFieldName = String.Format("{0}{1}{2}", fieldName, delimiter, i);
                             }
 
-                            config = source.Configs.Add(arraySectionName);
+                            IConfig config = source.Configs.Add(arraySectionName);
                             if (config == null)
                                 break;
 
-                            if (!IniWriter.SetGenericValue(type, config, arrayFieldName, list[i]))
+                            if (!config.SetGenericValue(type, arrayFieldName, list[i]))
                             {
                                 if (arrayMode == ArrayType.Key)
                                     throw new ArgumentException(String.Format("Unable to convert {0} to keys", fieldType));
@@ -149,7 +101,7 @@ namespace CSharpIniFileSerializer
                             }
                         }
                     }
-                    else if (fieldType.IsClass)
+                    else if (fieldType.IsClass || fieldType.IsStruct())
                     {
                         depth.Push(sectionName.Split((char)settings.DefaultObjectDelimiter).Last());
                         Serialize(value, ref source, ref settings, ref recurciveStackOverFlow, ref depth);

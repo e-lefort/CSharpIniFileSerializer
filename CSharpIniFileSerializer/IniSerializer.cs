@@ -21,13 +21,13 @@ namespace CSharpIniFileSerializer
         public static IEnumerable<MemberInfo> GetMemberInfo<T>(T obj, IniSettings settings)
         {
             List<MemberInfo> members = new List<MemberInfo>();
-            if ((settings.DefaultTypeInfo & TypeInfo.Fields) == TypeInfo.Fields)
+            if ((settings.SetTypeInfo & TypeInfo.Fields) == TypeInfo.Fields)
             {
-                members.AddRange(obj.GetType().GetFields(settings.DefaultBindingFlags));
+                members.AddRange(obj.GetType().GetFields(settings.SetBindingFlags));
             }
-            if ((settings.DefaultTypeInfo & TypeInfo.Properties) == TypeInfo.Properties)
+            if ((settings.SetTypeInfo & TypeInfo.Properties) == TypeInfo.Properties)
             {
-                members.AddRange(obj.GetType().GetProperties(settings.DefaultBindingFlags));
+                members.AddRange(obj.GetType().GetProperties(settings.SetBindingFlags));
             }
             return members;
         }

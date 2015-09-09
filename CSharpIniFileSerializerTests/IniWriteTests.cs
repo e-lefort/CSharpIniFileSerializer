@@ -21,13 +21,13 @@ namespace CSharpIniFileSerializerTests
 
             IniSerializer.Serialize<Person>(person,
                 Path.Combine(Directory.GetCurrentDirectory(), "WriteDefaultTest.ini"), 
-                new IniSettings() { DefaultTypeInfo = TypeInfo.Properties });
+                new IniSettings() { SetTypeInfo = TypeInfo.Properties });
 
             Person person2 = new Person();
 
             IniSerializer.Deserialize<Person>(ref person2,
                 Path.Combine(Directory.GetCurrentDirectory(), "WriteDefaultTest.ini"),
-                new IniSettings() { DefaultTypeInfo = TypeInfo.Properties });
+                new IniSettings() { SetTypeInfo = TypeInfo.Properties });
 
             Assert.AreEqual(person.FirstName, person2.FirstName);
             Assert.AreEqual(person.LastName, person2.LastName);
@@ -43,17 +43,17 @@ namespace CSharpIniFileSerializerTests
 
             IniSerializer.Serialize<GroupOfPerson>(origin,
                 Path.Combine(Directory.GetCurrentDirectory(), "WriteListOfObjectTest.ini"),
-                new IniSettings() { DefaultTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
+                new IniSettings() { SetTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
 
             GroupOfPerson serialized = new GroupOfPerson();
 
             IniSerializer.Deserialize<GroupOfPerson>(ref serialized,
                 Path.Combine(Directory.GetCurrentDirectory(), "WriteListOfObjectTest.ini"),
-                new IniSettings() { DefaultTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
+                new IniSettings() { SetTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
 
             IniSerializer.Serialize<GroupOfPerson>(serialized,
                 Path.Combine(Directory.GetCurrentDirectory(), "WriteListOfObjectTest_serialized.ini"),
-                new IniSettings() { DefaultTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
+                new IniSettings() { SetTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
 
             Assert.AreEqual(origin.Persons.Count, serialized.Persons.Count);
 
@@ -83,17 +83,17 @@ namespace CSharpIniFileSerializerTests
 
             IniSerializer.Serialize<GroupOfGroupOfPerson>(origin,
                 Path.Combine(Directory.GetCurrentDirectory(), "WriteListOfObjectTest2.ini"),
-                new IniSettings() { DefaultTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
+                new IniSettings() { SetTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
 
             GroupOfGroupOfPerson serialized = new GroupOfGroupOfPerson();
 
             IniSerializer.Deserialize<GroupOfGroupOfPerson>(ref serialized,
                 Path.Combine(Directory.GetCurrentDirectory(), "WriteListOfObjectTest2.ini"),
-                new IniSettings() { DefaultTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
+                new IniSettings() { SetTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
 
             IniSerializer.Serialize<GroupOfGroupOfPerson>(serialized,
                Path.Combine(Directory.GetCurrentDirectory(), "WriteListOfObjectTest2_serialized.ini"),
-               new IniSettings() { DefaultTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
+               new IniSettings() { SetTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
         }
 
         [Test]
@@ -104,9 +104,16 @@ namespace CSharpIniFileSerializerTests
             dogs.Add(new Dog("Bob"));
             dogs.Add(new Dog("Adam"));
 
-            IniSerializer.Serialize<List<Dog>>(dogs,
-                Path.Combine(Directory.GetCurrentDirectory(), "WriteDogs.ini"),
-                new IniSettings() { DefaultTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
+            try
+            {
+                IniSerializer.Serialize<List<Dog>>(dogs,
+                    Path.Combine(Directory.GetCurrentDirectory(), "WriteDogs.ini"),
+                    new IniSettings() { SetTypeInfo = TypeInfo.Properties, DefaultArrayType = ArrayType.Section });
+            }
+            catch (Exception ex)
+            {
+                AssertionException.Equals(new System.Reflection.TargetParameterCountException(), ex);
+            }
         }
     }
 }
