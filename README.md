@@ -66,12 +66,17 @@ Section or Key
 ## Read from INI File
 ```csharp
 MyClass obj = new MyClass();
-IniSerializer.Deserialize<MyClass>(ref obj,
-	Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
+using (StreamReader sr = new StreamReader(
+	Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"), true))
+{
+	IniReader reader = new IniReader();
+	reader.Deserialize<MyClass>(ref obj, sr);
+}
 ```
 ## Write to INI File
 ```csharp
-IniSerializer.Serialize<MyClass>(obj, 
+IniWriter writer = new IniWriter();
+writer.Serialize<MyClass>(obj, 
 	Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
 ```
 # Supported Type
@@ -114,9 +119,10 @@ static void Main(string[] args)
 		DateOfBirth = DateTime.Parse("5/01/1969") 
 	});
 	
-	IniSerializer.Serialize<GroupOfPerson>(gop,
-		Path.Combine(Directory.GetCurrentDirectory(), "artists.ini"),
-		new IniSettings() { DefaultTypeInfo = TypeInfo.Properties });
+	IniWriter writer = new IniWriter();
+	writer.settings = new IniSettings() { DefaultTypeInfo = TypeInfo.Properties };
+	writer.Serialize<GroupOfPerson>(gop, 
+		Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
 }
 ```
 ```
