@@ -30,39 +30,15 @@ m_DisplayString=Hello World
 MyCustomName=0.42
 ```
 ## Attributes
-### Section name
-```csharp
-[IniSectionName("GLOBAL")]
-```
-### Custom field name
-```csharp
-[IniFieldName("DisplayBool")]
-```
-### Personalize array delimiter
-```csharp
-[IniArrayDelimiter(ArrayDelimiter.Underscore)]
-```
-```csharp
-Equal = '='
-Colon = ':'
-Space = ' '
-Underscore = '_'
-```
-### Select array format
-```csharp
-[IniArrayType(ArrayType.Section)]
-```
-```csharp
-Section or Key
-```
-### Ignore field or property
-```csharp
-[IniIgnore]
-```
-### Set default value
-```csharp
-[IniDefaultValue("0.25")]
-```
+| Attribute        						| Description   		|
+| -------------------------------------------------------------	| -----------------------------	|
+| ``` [IniSectionName("GLOBAL") ```				| name a section 		|
+| ``` [IniFieldName("DisplayBool")] ```				| name a field      		|
+| ``` [IniArrayDelimiter(ArrayDelimiter.Underscore)] ```	| personalize array delimite	|
+| ``` [IniArrayType(ArrayType.Section)] ```			| select array format      	|
+| ``` [IniIgnore] ```						| ignore field or propert	|
+| ``` [IniDefaultValue("0.25")] ```				| set default value      	|
+
 ## Read from INI File
 ```csharp
 MyClass obj = new MyClass();
