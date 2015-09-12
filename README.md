@@ -24,7 +24,7 @@ class MyClass
 }
 ```
 Output result (.ini)
-```
+``` ini
 [GLOBAL]
 m_DisplayString=Hello World
 MyCustomName=0.42
@@ -101,7 +101,7 @@ static void Main(string[] args)
 		Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
 }
 ```
-```
+``` ini
 [GroupOfPerson:0/Person]
 FirstName = Alice
 LastName = Cooper
