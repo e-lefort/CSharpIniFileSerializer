@@ -6,44 +6,10 @@ using Nini.Config;
 using System.Globalization;
 using System.Drawing;
 
-namespace CSharpIniFileSerializer
+namespace CSharpIniFileSerializer.IniSerializer
 {
-    public static class SerializerParser
+    public static class IConfigHelper
     {
-        public static string ParseGenericValue(Type type, object obj)
-        {
-            if (type == typeof(string) || type == typeof(char)
-                || type == typeof(int) || type == typeof(short) || type == typeof(long))
-            {
-                return obj.ToString();
-            }
-            else if (type == typeof(float))
-            {
-                return ((float)obj).ToString("G0", CultureInfo.InvariantCulture);
-            }
-            else if (type == typeof(double))
-            {
-                return ((double)obj).ToString("G0", CultureInfo.InvariantCulture);
-            }
-            else if (type == typeof(bool))
-            {
-                return ((bool)obj) ? "true" : "false";
-            }
-            else if (type == typeof(Color))
-            {
-                return ColorTranslator.ToHtml((Color)obj);
-            }
-            else if (type.IsEnum)
-            {
-                return obj.ToString();
-            }
-            else if (type == typeof(DateTime))
-            {
-                return obj.ToString();
-            }
-            return String.Empty;
-        }
-
         public static object GetGenericValue(this IConfig config, Type type, string fieldName, string defaultValue)
         {
             if (type == null)
@@ -109,7 +75,7 @@ namespace CSharpIniFileSerializer
 
             if (type.IsGenericValue())
             {
-                config.Set(fieldName, ParseGenericValue(type, obj));
+                config.Set(fieldName, Utils.ParseGenericValue(type, obj));
                 return true;
             }
             return false;

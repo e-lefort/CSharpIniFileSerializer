@@ -5,7 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Drawing;
 
-namespace CSharpIniFileSerializer
+namespace CSharpIniFileSerializer.IniSerializer
 {
     public static class TypeHelper
     {
@@ -35,7 +35,7 @@ namespace CSharpIniFileSerializer
                 if (interfaceType.IsGenericType 
                     && interfaceType.GetGenericTypeDefinition() == typeof(IList<>))
                 {
-                    return type.GetGenericArguments().First();
+                    return interfaceType.GetGenericArguments().First();
                 }
             }
             return null;
