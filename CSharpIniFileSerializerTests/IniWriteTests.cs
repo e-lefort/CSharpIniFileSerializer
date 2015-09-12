@@ -104,6 +104,20 @@ namespace CSharpIniFileSerializerTests
             dogs.Add(new Dog("Bob"));
             dogs.Add(new Dog("Adam"));
 
+            List<Dog> obj = new List<Dog>();
+
+            using (StreamReader sr = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "WriteDogs.ini"), true))
+            {
+                CSharpIniFileSerializer.IniSerializer.IniReader reader = new CSharpIniFileSerializer.IniSerializer.IniReader();
+                reader.Deserialize<List<Dog>>(ref obj, sr);
+            }
+
+            using (StreamReader sr = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "WriteDogs.ini"), true))
+            {
+                CSharpIniFileSerializer.IniSerializer.IniReader reader = new CSharpIniFileSerializer.IniSerializer.IniReader();
+                reader.Deserialize<List<Dog>>(ref obj, sr);
+            }
+
             try
             {
                 IniSerializer.Serialize<List<Dog>>(dogs,

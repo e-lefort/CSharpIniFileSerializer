@@ -51,6 +51,10 @@
       <Project>{E60109CE-56FF-4221-99A3-6B3421CBCCD3}</Project>
       <Name>CSharpIniFileSerializerTests</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CSharpIniFileSerializer\CSharpIniFileSerializer.csproj">
+      <Project>{514A6D8D-E0E4-41A3-A5F3-072ED161AF6F}</Project>
+      <Name>CSharpIniFileSerializer</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
