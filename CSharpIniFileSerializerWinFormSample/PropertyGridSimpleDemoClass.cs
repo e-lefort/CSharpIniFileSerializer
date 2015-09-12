@@ -149,13 +149,23 @@ namespace CSharpIniFileSerializerWinFormSample
         public static PropertyGridSimpleDemoClass Load()
         {
             PropertyGridSimpleDemoClass obj = new PropertyGridSimpleDemoClass();
-            IniSerializer.Deserialize<PropertyGridSimpleDemoClass>(ref obj, Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
+            using (StreamReader sr = new StreamReader(Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"), true))
+            {
+                CSharpIniFileSerializer.IniSerializer.IniReader reader = new CSharpIniFileSerializer.IniSerializer.IniReader();
+                reader.Deserialize<PropertyGridSimpleDemoClass>(ref obj, sr);
+            }
             return obj;
+
+            /*PropertyGridSimpleDemoClass obj = new PropertyGridSimpleDemoClass();
+            IniSerializer.Deserialize<PropertyGridSimpleDemoClass>(ref obj, Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
+            return obj;*/
         }
 
         public static void Save(PropertyGridSimpleDemoClass obj)
         {
-            IniSerializer.Serialize<PropertyGridSimpleDemoClass>(obj, Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
+            CSharpIniFileSerializer.IniSerializer.IniWriter writer = new CSharpIniFileSerializer.IniSerializer.IniWriter();
+            writer.Serialize<PropertyGridSimpleDemoClass>(obj, Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
+            //IniSerializer.Serialize<PropertyGridSimpleDemoClass>(obj, Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
         }
     }
 }

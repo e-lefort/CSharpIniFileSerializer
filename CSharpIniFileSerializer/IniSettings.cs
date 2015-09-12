@@ -30,13 +30,13 @@ namespace CSharpIniFileSerializer
 
         public static void Save(IniSettings obj)
         {
-            IniSerializer.Serialize<IniSettings>(obj, Path.Combine(Directory.GetCurrentDirectory(), "inisettings.ini"), new IniSettings() { SetTypeInfo = TypeInfo.All });
+            //IniSerializer.Serialize<IniSettings>(obj, Path.Combine(Directory.GetCurrentDirectory(), "inisettings.ini"), new IniSettings() { SetTypeInfo = TypeInfo.All });
         }
 
         public static IniSettings Load()
         {
             IniSettings settings = new IniSettings();
-            IniSerializer.Deserialize<IniSettings>(ref settings, Path.Combine(Directory.GetCurrentDirectory(), "inisettings.ini"), new IniSettings() { SetTypeInfo = TypeInfo.Properties });
+            //IniSerializer.Deserialize<IniSettings>(ref settings, Path.Combine(Directory.GetCurrentDirectory(), "inisettings.ini"), new IniSettings() { SetTypeInfo = TypeInfo.Properties });
             return settings;
         }
     }
