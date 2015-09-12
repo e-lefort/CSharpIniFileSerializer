@@ -32,11 +32,11 @@ MyCustomName=0.42
 ## Attributes
 | Attribute        						| Description   		|
 | -------------------------------------------------------------	| -----------------------------	|
-| ``` [IniSectionName("GLOBAL") ```				| name a section 		|
-| ``` [IniFieldName("DisplayBool")] ```				| name a field      		|
-| ``` [IniArrayDelimiter(ArrayDelimiter.Underscore)] ```	| personalize array delimite	|
-| ``` [IniArrayType(ArrayType.Section)] ```			| select array format      	|
-| ``` [IniIgnore] ```						| ignore field or propert	|
+| ``` [IniSectionName("GLOBAL") ```				| change default section name	|
+| ``` [IniFieldName("DisplayBool")] ```				| change default field name	|
+| ``` [IniArrayDelimiter(ArrayDelimiter.Underscore)] ```	| set array delimite		|
+| ``` [IniArrayType(ArrayType.Section)] ```			| set array format      	|
+| ``` [IniIgnore] ```						| ignore field or property	|
 | ``` [IniDefaultValue("0.25")] ```				| set default value      	|
 
 ## Read from INI File
