@@ -24,61 +24,42 @@ class MyClass
 }
 ```
 Output result (.ini)
-```
+``` ini
 [GLOBAL]
 m_DisplayString=Hello World
 MyCustomName=0.42
 ```
 ## Attributes
-### Section name
-```csharp
-[IniSectionName("GLOBAL")]
-```
-### Custom field name
-```csharp
-[IniFieldName("DisplayBool")]
-```
-### Personalize array delimiter
-```csharp
-[IniArrayDelimiter(ArrayDelimiter.Underscore)]
-```
-```csharp
-Equal = '='
-Colon = ':'
-Space = ' '
-Underscore = '_'
-```
-### Select array format
-```csharp
-[IniArrayType(ArrayType.Section)]
-```
-```csharp
-Section or Key
-```
-### Ignore field or property
-```csharp
-[IniIgnore]
-```
-### Set default value
-```csharp
-[IniDefaultValue("0.25")]
-```
+| Attribute        						| Description   		|
+| -------------------------------------------------------------	| -----------------------------	|
+| ``` [IniSectionName("GLOBAL") ```				| change default section name	|
+| ``` [IniFieldName("DisplayBool")] ```				| change default field name	|
+| ``` [IniArrayDelimiter(ArrayDelimiter.Underscore)] ```	| set array delimite		|
+| ``` [IniArrayType(ArrayType.Section)] ```			| set array format      	|
+| ``` [IniIgnore] ```						| ignore field or property	|
+| ``` [IniDefaultValue("0.25")] ```				| set default value      	|
+
 ## Read from INI File
 ```csharp
 MyClass obj = new MyClass();
-IniSerializer.Deserialize<MyClass>(ref obj,
-	Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
+using (StreamReader sr = new StreamReader(
+	Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"), true))
+{
+	IniReader reader = new IniReader();
+	reader.Deserialize<MyClass>(ref obj, sr);
+}
 ```
 ## Write to INI File
 ```csharp
-IniSerializer.Serialize<MyClass>(obj, 
+IniWriter writer = new IniWriter();
+writer.Serialize<MyClass>(obj, 
 	Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
 ```
 # Supported Type
 - Generic types (string, char, short, int, long, float, double, bool, Enum, Color, Date)
 - Array and IList
 
-# Advanced serilization (depth)
+# Advanced serialization (depth)
 ```csharp
 public class Person
 {
@@ -110,15 +91,17 @@ static void Main(string[] args)
 	gop.Persons.Add(new Person() 
 	{ 
 		FirstName = "Marilyin", 
-		LastName = "Manson", DateOfBirth = 
-		DateTime.Parse("5/01/1969") 
+		LastName = "Manson", 
+		DateOfBirth = DateTime.Parse("5/01/1969") 
 	});
 	
-	IniSerializer.Serialize<GroupOfPerson>(gop,
-		Path.Combine(Directory.GetCurrentDirectory(), "artists.ini"),
+	IniWriter writer = new IniWriter();
+	writer.settings = new IniSettings() { DefaultTypeInfo = TypeInfo.Properties };
+	writer.Serialize<GroupOfPerson>(gop, 
+		Path.Combine(Directory.GetCurrentDirectory(), "settings.ini"));
 }
 ```
-```
+``` ini
 [GroupOfPerson:0/Person]
 FirstName = Alice
 LastName = Cooper
