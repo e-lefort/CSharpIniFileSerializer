@@ -51,7 +51,7 @@ namespace CSharpIniFileSerializer.IniAttributes
 
     public class IniCollectionAttributesManager
     {
-        IniAttributesManager attributes { get; set; }
+        public IniAttributesManager attributes { get; set; }
 
         IniArrayDelimiter arrayDelimiter { get; set; }
         IniArrayField arrayField { get; set; }
@@ -63,12 +63,20 @@ namespace CSharpIniFileSerializer.IniAttributes
         {
             this.attributes = attributes;
 
-            this.arrayDelimiter = (IniArrayDelimiter)member.GetCustomAttributes(true).FirstOrDefault(x => x is IniArrayDelimiter);
-            this.arrayField = (IniArrayField)member.GetCustomAttributes(true).FirstOrDefault(x => x is IniArrayField);
-            this.arrayType = (IniArrayType)member.GetCustomAttributes(true).FirstOrDefault(x => x is IniArrayType);
-            this.arrayMode = (arrayType == null) ? attributes.settings.DefaultArrayType : arrayType.type;
-
+            if (member != null)
+            {
+                this.arrayDelimiter = (IniArrayDelimiter)member.GetCustomAttributes(true).FirstOrDefault(x => x is IniArrayDelimiter);
+                this.arrayField = (IniArrayField)member.GetCustomAttributes(true).FirstOrDefault(x => x is IniArrayField);
+                this.arrayType = (IniArrayType)member.GetCustomAttributes(true).FirstOrDefault(x => x is IniArrayType);
+                this.arrayMode = (arrayType == null) ? attributes.settings.DefaultArrayType : arrayType.type;
+            }
+            
             this.delimiter = (arrayDelimiter == null) ? (char)attributes.settings.DefaultArrayDelimiter : (char)arrayDelimiter.delimiter;
+        }
+
+        public IniCollectionAttributesManager(IniAttributesManager attributes) : this (null, attributes)
+        {
+
         }
 
         public string GetArraySectionName(int index)

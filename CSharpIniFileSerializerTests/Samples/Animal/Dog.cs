@@ -9,6 +9,11 @@ namespace CSharpIniFileSerializerTests.Samples.Animal
     {
         private string name;
 
+        public Dog()
+        {
+
+        }
+
         public Dog(string name)
         {
             this.Name = name;
@@ -31,5 +36,10 @@ namespace CSharpIniFileSerializerTests.Samples.Animal
             get { return name; }
             set { name = value; }
         }
+    }
+
+    class Chenille
+    {
+        public List<IAnimal> dogs = new List<IAnimal>();
     }
 }

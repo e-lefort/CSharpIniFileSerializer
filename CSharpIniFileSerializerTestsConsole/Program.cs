@@ -14,7 +14,7 @@ namespace CSharpIniFileSerializerTestsConsole
         {
             IniWriteTests iniWriteTests = new IniWriteTests();
 
-            iniWriteTests.WriteDogs();
+            iniWriteTests.WriteListOfObjectTest();
 
         }
     }

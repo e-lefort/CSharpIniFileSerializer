@@ -15,6 +15,11 @@ namespace CSharpIniFileSerializer.IniSerializer
     {
         public void Deserialize<T>(ref T obj, StreamReader reader)
         {
+            if (obj == null)
+                throw new ArgumentNullException("obj");
+            if (reader == null)
+                throw new ArgumentNullException("reader");
+
             base.source = new IniConfigSource(reader);
             base.recurciveStackOverFlow = new Stack<object>();
             base.depth = new Stack<string>();
@@ -23,22 +28,21 @@ namespace CSharpIniFileSerializer.IniSerializer
             MemberInfo member = Utils.GetMemberInfo(obj, settings.SetTypeInfo, settings.SetBindingFlags).First();
             IniAttributesManager attributes = new IniAttributesManager(member, obj, settings);
 
-            if (currenType.IsGenericValue())
+            if (currenType.GetInterface(typeof(IList).Name) != null || currenType.IsArray)
             {
-                member.SetValue(obj, DeserializePrimitive(currenType, attributes.sectionName, attributes.fieldName, attributes.defaultValue));
-            }
-            else if (currenType.GetInterface(typeof(IList).Name) != null || currenType.IsArray)
-            {
-                attributes.sectionName = "ArrayOf" + MemberInfoHelper.GetType(member).GetIListElementType().Name;
-                DeserializeCollection(obj, attributes, member);
+                IniCollectionAttributesManager collectionAttributes = new IniCollectionAttributesManager(attributes);
+                attributes.sectionName = "ArrayOf" + obj.GetType().GetGenericArguments()[0].Name;
+                DeserializeCollection(obj as IList, collectionAttributes);
             }
             else if (currenType.IsClass || currenType.IsStruct())
             {
-                DeserializeObject(obj, settings.SetTypeInfo, settings.SetBindingFlags);
+                DeserializeObject(ref obj, settings.SetTypeInfo, settings.SetBindingFlags);
             }
+            else
+                throw new NotImplementedException();
         }
 
-        private void DeserializeObject<T>(T obj, MemberInfo member)
+        private void DeserializeObject<T>(ref T obj, MemberInfo member)
         {
             Console.WriteLine("> DeserializeObject");
 
@@ -51,7 +55,10 @@ namespace CSharpIniFileSerializer.IniSerializer
             IncrementDepth(attributes);
 
             if (!ContainsSection(attributes.sectionName))
+            {
+                obj = default(T);
                 return;
+            }
 
             if (currenType.IsGenericValue())
             {
@@ -65,16 +72,20 @@ namespace CSharpIniFileSerializer.IniSerializer
             else if (currenType.IsClass || currenType.IsStruct())
             {
                 depth.Push(attributes.sectionName.Split((char)settings.DefaultObjectDelimiter).Last());
-                DeserializeObject(member.GetValue(obj), settings.SetTypeInfo, settings.SetBindingFlags);
+                object refObj = member.GetValue(obj);
+                DeserializeObject(ref refObj, settings.SetTypeInfo, settings.SetBindingFlags);
                 depth.Pop();
             }
         }
 
-        private void DeserializeObject<T>(T obj, TypeInfo typeInfo, BindingFlags bindingFlags)
+        private void DeserializeObject<T>(ref T obj, TypeInfo typeInfo, BindingFlags bindingFlags)
         {
             foreach (var member in Utils.GetMemberInfo(obj, typeInfo, bindingFlags))
             {
-                DeserializeObject(obj, member);
+                if (obj == null)
+                    break;
+
+                DeserializeObject(ref obj, member);
             }
         }
 
@@ -92,46 +103,10 @@ namespace CSharpIniFileSerializer.IniSerializer
             Console.WriteLine(">> " + attributes.sectionName);
 
             Type currenType = MemberInfoHelper.GetType(member).GetIListElementType();
-
             IList list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(currenType));
-
             IniCollectionAttributesManager collectionAttributes = new IniCollectionAttributesManager(member, attributes);
 
-            for (int i = 0; ; i++)
-            {
-                string arraySectionName = collectionAttributes.GetArraySectionName(i);
-                string arrayFieldName = collectionAttributes.GetArrayFieldName(i);
-
-                if (!ContainsSection(arraySectionName))
-                    return;
-
-                IConfig config = source.Configs[arraySectionName];
-
-                if (currenType.IsGenericValue())
-                {
-                    if (config == null || !config.Contains(arrayFieldName))
-                        break;
-
-                    object value = DeserializePrimitive(currenType, arraySectionName, arrayFieldName, attributes.defaultValue);                  
-                    list.Add(value);
-                }
-                else if (currenType.GetInterface(typeof(IList).Name) != null || currenType.IsArray)
-                {
-                    object subObj = Activator.CreateInstance(currenType);
-                    depth.Push(arraySectionName.Split((char)settings.DefaultObjectDelimiter).Last());
-                    DeserializeCollection(subObj, attributes, member);
-                    depth.Pop();
-                    list.Add(subObj);
-                }
-                else if (currenType.IsClass || currenType.IsStruct())
-                {
-                    object subObj = Activator.CreateInstance(currenType);
-                    depth.Push(arraySectionName.Split((char)settings.DefaultObjectDelimiter).Last());
-                    DeserializeObject(subObj, settings.SetTypeInfo, settings.SetBindingFlags);
-                    depth.Pop();
-                    list.Add(subObj);
-                }
-            }
+            DeserializeCollection(list, collectionAttributes);
 
             if (list.Count == 0)
                 return;
@@ -145,6 +120,62 @@ namespace CSharpIniFileSerializer.IniSerializer
             }
 
             member.SetValue(obj, list);
+        }
+
+        private void DeserializeCollection(IList list, IniCollectionAttributesManager collectionAttributes)
+        {
+            Type currenType = list.GetType().GetGenericArguments()[0];
+
+            for (int i = 0; ; i++)
+            {
+                string arraySectionName = collectionAttributes.GetArraySectionName(i);
+                string arrayFieldName = collectionAttributes.GetArrayFieldName(i);
+
+                string sectionNameCached = arraySectionName;
+
+                IConfig config = source.Configs[arraySectionName];
+
+                if (currenType.IsGenericValue())
+                {
+                    if (!ContainsSection(arraySectionName))
+                        break;
+
+                    if (config == null || !config.Contains(arrayFieldName))
+                        break;
+
+                    object value = DeserializePrimitive(currenType, arraySectionName, arrayFieldName, collectionAttributes.attributes.defaultValue);
+                    list.Add(value);
+                }
+                else if (currenType.GetInterface(typeof(IList).Name) != null || currenType.IsArray)
+                {
+                    if (!ContainsSection(arraySectionName))
+                        break;
+
+                    object subObj = Activator.CreateInstance(currenType);
+                    depth.Push(arraySectionName.Split((char)settings.DefaultObjectDelimiter).Last());
+                    DeserializeCollection(subObj as IList, new IniCollectionAttributesManager(collectionAttributes.attributes));
+                    if (subObj == null)
+                    {
+                        depth.Pop();
+                        break;
+                    }
+                    depth.Pop();
+                    list.Add(subObj);
+                }
+                else if (currenType.IsClass || currenType.IsStruct())
+                {
+                    object subObj = Activator.CreateInstance(currenType);
+                    depth.Push(arraySectionName.Split((char)settings.DefaultObjectDelimiter).Last());
+                    DeserializeObject(ref subObj, settings.SetTypeInfo, settings.SetBindingFlags);
+                    if (subObj == null)
+                    {
+                        depth.Pop();
+                        break;
+                    }
+                    depth.Pop();
+                    list.Add(subObj);
+                }
+            }
         }
     }
 }

@@ -15,6 +15,11 @@ namespace CSharpIniFileSerializer.IniSerializer
     {
         public void Serialize<T>(T obj, string path)
         {
+            if (obj == null)
+                throw new ArgumentNullException("obj");
+            if (String.IsNullOrEmpty(path))
+                throw new ArgumentNullException("path");
+
             File.Delete(path);
 
             if (!File.Exists(path))
@@ -24,9 +29,25 @@ namespace CSharpIniFileSerializer.IniSerializer
             base.recurciveStackOverFlow = new Stack<object>();
             base.depth = new Stack<string>();
 
+            Type currenType = obj.GetType();
+            MemberInfo member = Utils.GetMemberInfo(obj, settings.SetTypeInfo, settings.SetBindingFlags).First();
+            IniAttributesManager attributes = new IniAttributesManager(member, obj, settings);
+
             try
             {
-                SerializeObject(obj);
+                if (currenType.GetInterface(typeof(IList).Name) != null || currenType.IsArray)
+                {
+                    IniCollectionAttributesManager collectionAttributes = new IniCollectionAttributesManager(member, attributes);
+                    Type type = obj.GetType().GetGenericArguments()[0];
+                    attributes.sectionName = "ArrayOf" + type.Name;
+                    SerializeCollection(obj, type, collectionAttributes);
+                }
+                else if (currenType.IsClass || currenType.IsStruct())
+                {
+                    SerializeObject(obj);
+                }
+                else
+                    throw new NotImplementedException();
             }
             finally
             {
@@ -87,11 +108,16 @@ namespace CSharpIniFileSerializer.IniSerializer
             Type fieldType = MemberInfoHelper.GetType(member);
             Type currenType = fieldType.GetElementType() ?? fieldType.GetGenericArguments().First();
 
+            IniCollectionAttributesManager collectionAttributes = new IniCollectionAttributesManager(member, attributes);
+
+            SerializeCollection(value, currenType, collectionAttributes);
+        }
+
+        private void SerializeCollection(object value, Type currenType, IniCollectionAttributesManager collectionAttributes)
+        {
             IList list = value as IList;
             if (list == null)
                 return;
-
-            IniCollectionAttributesManager collectionAttributes = new IniCollectionAttributesManager(member, attributes);
 
             for (int i = 0; i < list.Count; i++)
             {
@@ -105,7 +131,9 @@ namespace CSharpIniFileSerializer.IniSerializer
                 }
                 else if (currenType.GetInterface(typeof(IList).Name) != null || currenType.IsArray)
                 {
-                    SerializeCollection(list[i], attributes, member);
+                    depth.Push(arraySectionName.Split((char)settings.DefaultObjectDelimiter).Last());
+                    SerializeCollection(list[i], currenType.GetGenericArguments()[0], new IniCollectionAttributesManager(collectionAttributes.attributes));
+                    depth.Pop();
                 }
                 else
                 {
