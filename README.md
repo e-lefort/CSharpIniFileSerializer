@@ -37,7 +37,6 @@ MyCustomName=0.42
 | ``` [IniArrayDelimiter(ArrayDelimiter.Underscore)] ```	| set array delimite		|
 | ``` [IniArrayType(ArrayType.Section)] ```			| set array format      	|
 | ``` [IniIgnore] ```						| ignore field or property	|
-| ``` [IniDefaultValue("0.25")] ```				| set default value      	|
 
 ## Read from INI File
 ```csharp
